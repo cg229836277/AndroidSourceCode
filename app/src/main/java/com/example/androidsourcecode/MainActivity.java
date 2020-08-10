@@ -4,19 +4,13 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.internal.schedulers.SingleScheduler;
-import io.reactivex.plugins.RxJavaPlugins;
+import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -28,6 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends Activity {
     String TAG = "MainActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,19 +43,24 @@ public class MainActivity extends Activity {
 
             repos.enqueue(new Callback<ResponseBody>() {
                 @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response){
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     try {
                         ResponseBody responseBody = response.body();
+                        if (responseBody == null || !response.isSuccessful()) {
+                            String errorBody = response.errorBody().string();
+                            Log.e(TAG, "errorBody message:" + errorBody);
+                            return;
+                        }
                         String message = responseBody.string();
-                        Log.d(TAG, "message:" + message);
-                    }catch (Exception e){
+                        Log.e(TAG, "message:" + message);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                    Log.e(TAG, "onFailure:" + t.getMessage());
                 }
             });
 
@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void onSubscribe(Disposable d) {
-                    
+
                 }
 
                 @Override
@@ -84,6 +84,28 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void onComplete() {
+
+                }
+            });
+
+            io.reactivex.rxjava3.disposables.Disposable disposable = service.getUserInfo3("cg22983677").subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.single()).observeOn(io.reactivex.rxjava3.schedulers.Schedulers.newThread()).subscribe(new Consumer<Response>() {
+                @Override
+                public void accept(Response response) throws Throwable {
+
+                }
+            });
+            boolean disposed = disposable.isDisposed();
+
+            service.getUserInfo4("cg22983677").subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.single()).observeOn(io.reactivex.rxjava3.schedulers.Schedulers.newThread()).subscribe(new Consumer<Response>() {
+                @Override
+                public void accept(Response response) throws Throwable {
+
+                }
+            });
+
+            service.getUserInfo5("cg22983677").subscribeOn(io.reactivex.rxjava3.schedulers.Schedulers.single()).observeOn(io.reactivex.rxjava3.schedulers.Schedulers.newThread()).subscribe(new Consumer<Response>() {
+                @Override
+                public void accept(Response response) throws Throwable {
 
                 }
             });
